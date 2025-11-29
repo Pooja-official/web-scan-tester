@@ -1,0 +1,43 @@
+
+    <html>
+    <head>
+        <title>WebScanPro Security Report</title>
+        <style>
+            body { font-family: Arial, sans-serif; background: #f4f4f4; color: #222; }
+            table { border-collapse: collapse; margin-top:20px; }
+            th, td { border: 1px solid #aaa; padding: 8px 12px; }
+            th { background: #ddd; }
+            tr:nth-child(even) { background: #eee; }
+        </style>
+    </head>
+    <body>
+        <h1>WebScanPro Security Report</h1>
+        <p><b>Report generated:</b> 2025-11-27 11:49</p>
+        <table>
+            <tr>
+                <th>#</th>
+                <th>Vulnerability Type</th>
+                <th>Endpoint</th>
+                <th>Severity</th>
+                <th>Description</th>
+                <th>Suggested Mitigation</th>
+            </tr>
+    
+            <tr>
+                <td>1</td>
+                <td>SQL Injection</td>
+                <td>http://localhost/webscanpro/search.php</td>
+                <td>High</td>
+                <td>SQL error message when submitting crafted input</td>
+                <td>Use parameterized queries/prepared statements.</td>
+            </tr>
+        
+            <tr>
+                <td>2</td>
+                <td>XSS</td>
+                <td>http://localhost/webscanpro/comments.php</td>
+                <td>Medium</td>
+                <td>Reflected XSS payload in comment field</td>
+                <td>Properly escape user input/output.</td>
+            </tr>
+        </table></body></html>
