@@ -20,3 +20,12 @@ Tech Stack
 - Standard Python libraries ("requests", "BeautifulSoup", etc.).
 - Developed and tested in VS Code with Git and GitHub for version control.
 
+Project Status
+This is a student project created for practicing web application security testing and Python automation.
+Future improvements could include more vulnerability modules, better error handling, authentication support and a simple web UI.
+
+
+
+**Pooja**
+Student 
+
