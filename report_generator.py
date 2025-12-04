@@ -1,64 +1,177 @@
 import datetime
 
-def generate_report(vuln_results, filename="security_report.html"):
-    now = datetime.datetime.now().strftime("%Y-%m-%d %H:%M")
-    html_content = f"""
-    <html>
-    <head>
-        <title>WebScanPro Security Report</title>
-        <style>
-            body {{ font-family: Arial, sans-serif; background: #f4f4f4; color: #222; }}
-            table {{ border-collapse: collapse; margin-top:20px; }}
-            th, td {{ border: 1px solid #aaa; padding: 8px 12px; }}
-            th {{ background: #ddd; }}
-            tr:nth-child(even) {{ background: #eee; }}
-        </style>
-    </head>
-    <body>
-        <h1>WebScanPro Security Report</h1>
-        <p><b>Report generated:</b> {now}</p>
+def generate_report(vuln_results, filename="webscanpro_report.html"):
+    """
+    Build a colourful HTML security report from a list of vulnerability dicts.
+
+    Each item in vuln_results can have:
+      type, endpoint, parameter, payload, evidence, severity
+    Missing fields are shown as "-".
+    """
+    now = datetime.datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S UTC")
+
+    # Build table rows
+    rows_html = ""
+    for idx, v in enumerate(vuln_results, start=1):
+        vtype = v.get("type", "-")
+        endpoint = v.get("endpoint", "-")
+        parameter = v.get("parameter", "-")
+        payload = v.get("payload", "-")
+        evidence = v.get("evidence", "-")
+        severity = v.get("severity", "Medium")
+
+        # Colour class for severity badge
+        sev_class = "sev-medium"
+        if severity.lower() == "high":
+            sev_class = "sev-high"
+        elif severity.lower() == "low":
+            sev_class = "sev-low"
+
+        rows_html += f"""
+            <tr>
+                <td>{idx}</td>
+                <td>{vtype}</td>
+                <td>{endpoint}</td>
+                <td>{parameter}</td>
+                <td>{payload}</td>
+                <td>{evidence}</td>
+                <td><span class="sev-badge {sev_class}">{severity}</span></td>
+            </tr>
+        """
+
+    if not rows_html:
+        rows_html = """
+            <tr>
+                <td colspan="7" style="text-align:center;">No findings recorded.</td>
+            </tr>
+        """
+
+    total_findings = len(vuln_results)
+
+    html_content = f"""<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>WebScanPro Report</title>
+    <style>
+        body {{
+            font-family: Arial, Helvetica, sans-serif;
+            background: #f5f7fb;
+            color: #222;
+            margin: 0;
+            padding: 0;
+        }}
+        .header {{
+            background: linear-gradient(90deg, #0b63ce, #00a1ff);
+            color: #fff;
+            padding: 20px 40px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+        }}
+        .header h1 {{
+            margin: 0;
+            font-size: 28px;
+            letter-spacing: 0.5px;
+        }}
+        .meta {{
+            margin-top: 8px;
+            font-size: 13px;
+        }}
+        .container {{
+            padding: 20px 40px 40px 40px;
+        }}
+        h2 {{
+            margin-top: 25px;
+            color: #0b63ce;
+            border-bottom: 2px solid #e0e4f0;
+            padding-bottom: 4px;
+            font-size: 20px;
+        }}
+        table {{
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 15px;
+            background: #fff;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }}
+        th, td {{
+            padding: 8px 10px;
+            font-size: 13px;
+            border-bottom: 1px solid #e3e6f0;
+        }}
+        th {{
+            background: #eef1fb;
+            text-align: left;
+            font-weight: 600;
+        }}
+        tr:nth-child(even) td {{
+            background: #fafbff;
+        }}
+        .sev-badge {{
+            padding: 3px 8px;
+            border-radius: 8px;
+            color: #fff;
+            font-size: 12px;
+            font-weight: 600;
+        }}
+        .sev-high {{
+            background: #d9534f;
+        }}
+        .sev-medium {{
+            background: #f0ad4e;
+        }}
+        .sev-low {{
+            background: #5cb85c;
+        }}
+        ul {{
+            margin-top: 8px;
+        }}
+        .tagline {{
+            font-size: 12px;
+            opacity: 0.9;
+        }}
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>WebScanPro Report</h1>
+        <div class="meta">
+            <div><b>Target:</b> http://localhost/webscanpro</div>
+            <div><b>Date:</b> {now}</div>
+            <div class="tagline">Automated Web Application Security Scan Summary</div>
+        </div>
+    </div>
+
+    <div class="container">
+        <h2>Summary</h2>
+        <p><b>Total findings:</b> {total_findings}</p>
+
+        <h2>Findings</h2>
         <table>
             <tr>
                 <th>#</th>
-                <th>Vulnerability Type</th>
+                <th>Type</th>
                 <th>Endpoint</th>
+                <th>Parameter</th>
+                <th>Payload / Value</th>
+                <th>Evidence</th>
                 <th>Severity</th>
-                <th>Description</th>
-                <th>Suggested Mitigation</th>
             </tr>
-    """
-    for idx, res in enumerate(vuln_results, start=1):
-        html_content += f"""
-            <tr>
-                <td>{idx}</td>
-                <td>{res['type']}</td>
-                <td>{res['endpoint']}</td>
-                <td>{res['severity']}</td>
-                <td>{res['description']}</td>
-                <td>{res['mitigation']}</td>
-            </tr>
-        """
-    html_content += "</table></body></html>"
+            {rows_html}
+        </table>
+
+        <h2>Suggested Remediations (high‑level)</h2>
+        <ul>
+            <li>Use parameterized queries / ORM sanitization to prevent SQL injection.</li>
+            <li>Escape or encode output and implement CSP and input validation for XSS.</li>
+            <li>Set secure cookie flags (HttpOnly, Secure, SameSite) for session cookies.</li>
+            <li>Implement RBAC/ABAC and enforce server‑side authorization checks to prevent IDORs.</li>
+            <li>Enforce strong password policies and multi‑factor authentication for sensitive accounts.</li>
+        </ul>
+    </div>
+</body>
+</html>
+"""
+
     with open(filename, "w", encoding="utf-8") as f:
         f.write(html_content)
     print(f"Report saved as {filename}")
-
-if __name__ == "__main__":
-    # Example — replace with your real scan results
-    vuln_results = [
-        {
-            'type': 'SQL Injection',
-            'endpoint': 'http://localhost/webscanpro/search.php',
-            'severity': 'High',
-            'description': 'SQL error message when submitting crafted input',
-            'mitigation': 'Use parameterized queries/prepared statements.'
-        },
-        {
-            'type': 'XSS',
-            'endpoint': 'http://localhost/webscanpro/comments.php',
-            'severity': 'Medium',
-            'description': 'Reflected XSS payload in comment field',
-            'mitigation': 'Properly escape user input/output.'
-        }
-    ]
-    generate_report(vuln_results)
