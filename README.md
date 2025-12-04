@@ -25,7 +25,6 @@ This is a student project created for practicing web application security testin
 Future improvements could include more vulnerability modules, better error handling, authentication support and a simple web UI.
 
 
-
+## Author
 **Pooja**
-- Student 
 
